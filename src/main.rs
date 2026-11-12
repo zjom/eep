@@ -80,14 +80,7 @@ fn real_main() -> i32 {
     drop(inh); // release the lock before reporting
 
     match outcome {
-        Ok(code) => {
-            let _ = writeln!(
-                std::io::stdout(),
-                "eep: kept awake for {}; sleep allowed again.",
-                duration::fmt_human(clock.elapsed())
-            );
-            code
-        }
+        Ok(code) => code,
         Err(e) => {
             eprintln!("eep: {e}");
             1
