@@ -12,6 +12,10 @@ You need Python 3.8 or newer. There are no other dependencies.
 ln -s "$PWD/eep" ~/.local/bin/eep
 ```
 
+```sh
+nix run github:zjom/eep
+```
+
 ## Usage
 
 ```sh
