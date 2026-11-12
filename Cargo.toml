@@ -1,0 +1,15 @@
+[package]
+name = "eep"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "Keep your computer awake for a while, and watch something nice in the terminal"
+readme = "README.md"
+
+[dependencies]
+libc = "0.2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

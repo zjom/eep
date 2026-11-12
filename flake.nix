@@ -16,20 +16,11 @@
     in
     {
       packages = forAllSystems (pkgs: {
-        eep = pkgs.stdenvNoCC.mkDerivation {
+        eep = pkgs.rustPlatform.buildRustPackage {
           pname = "eep";
           version = self.shortRev or self.dirtyShortRev or "dev";
           src = ./.;
-
-          # Only needed so patchShebangs rewrites `#!/usr/bin/env python3`.
-          buildInputs = [ pkgs.python3 ];
-
-          dontBuild = true;
-          installPhase = ''
-            runHook preInstall
-            install -Dm755 eep $out/bin/eep
-            runHook postInstall
-          '';
+          cargoLock.lockFile = ./Cargo.lock;
 
           # systemd-inhibit / caffeinate are taken from the host's PATH on purpose:
           # they must talk to the running system's logind / power management.
@@ -50,7 +41,15 @@
       });
 
       devShells = forAllSystems (pkgs: {
-        default = pkgs.mkShell { packages = [ pkgs.python3 ]; };
+        default = pkgs.mkShell {
+          packages = with pkgs; [
+            cargo
+            rustc
+            clippy
+            rustfmt
+            rust-analyzer
+          ];
+        };
       });
 
       formatter = forAllSystems (pkgs: pkgs.nixfmt);

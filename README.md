@@ -6,11 +6,13 @@ Keep your computer awake for a while, and watch something nice in the terminal w
 
 ## Install
 
-You need Python 3.8 or newer. There are no other dependencies.
+With Cargo (Rust 1.88 or newer):
 
 ```sh
-ln -s "$PWD/eep" ~/.local/bin/eep
+cargo install --path .
 ```
+
+With Nix:
 
 ```sh
 nix run github:zjom/eep
