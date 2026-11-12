@@ -45,6 +45,7 @@ If output isn't going to a terminal, `eep` skips the animation automatically.
 | -------------------- | ------------------ |
 | `n`, space, `→`      | Next animation     |
 | `p`, `←`             | Previous animation |
+| `f`                  | Toggle fps meter   |
 | `q`, `Esc`, `Ctrl-C` | Quit               |
 
 ## Animations

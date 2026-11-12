@@ -594,6 +594,9 @@ def run_animated(start_name: str, clock: Clock, fps: int, inhibitor: Inhibitor) 
         anim = None
         frame_time = 1.0 / fps
         last = time.monotonic()
+        show_fps = False
+        fps_label = ""
+        fps_count, fps_since = 0, last
         while True:
             rem = clock.remaining
             if rem is not None and rem <= 0:
@@ -617,9 +620,19 @@ def run_animated(start_name: str, clock: Clock, fps: int, inhibitor: Inhibitor) 
             buf = ["\x1b[?2026h"]  # synchronized output (ignored if unsupported)
             for y, line in enumerate(lines[:area_h]):
                 buf.append(f"\x1b[{y + 1};1H\x1b[0m{line}")
+            if show_fps and fps_label:
+                col = max(1, cols - len(fps_label) + 1)
+                buf.append(f"\x1b[1;{col}H\x1b[0;7m{fps_label[:cols]}")
             buf.append("\x1b[0m\x1b[?2026l")
             out.write("".join(buf))
             out.flush()
+
+            # measured rate, including time blocked writing to the terminal
+            fps_count += 1
+            span = time.monotonic() - fps_since
+            if span >= 0.5:
+                fps_label = f" {fps_count / span:.0f}/{fps} fps "
+                fps_count, fps_since = 0, fps_since + span
 
             wait = max(0.0, frame_time - (time.monotonic() - now))
             if rem is not None:
@@ -630,6 +643,10 @@ def run_animated(start_name: str, clock: Clock, fps: int, inhibitor: Inhibitor) 
                     data = os.read(fd, 64)
                     if data in (b"q", b"Q", b"\x1b"):
                         return
+                    if data in (b"f", b"F"):
+                        show_fps = not show_fps
+                        if not show_fps:
+                            out.write("\x1b[2J")
                     step = 0
                     if data in (b"n", b"N", b" ") or b"\x1b[C" in data:
                         step = 1
@@ -670,7 +687,7 @@ def main(argv=None) -> int:
         description="Keep the computer from sleeping for a while, with terminal animations.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="durations: 90, 45s, 20m, 1h30m, 2.5h, '10 min', inf (default: until you quit)\n"
-               "keys while animating: n/space/→ next animation, p/← previous, q/esc quit\n\n"
+               "keys while animating: n/space/→ next animation, p/← previous, f fps meter, q/esc quit\n\n"
                "examples:\n  eep 30m\n  eep 2h -a fire\n  eep 1h --no-animation\n  eep -a random",
     )
     p.add_argument("duration", nargs="?", type=parse_duration, default=None,
